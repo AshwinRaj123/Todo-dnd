@@ -77,13 +77,15 @@ const Section = ({ status, tasks, setTasks, todos, inProgress, closed }) => {
     })
   }
 
+ 
+
   return (
     <div ref={drop} className={`w-64 ${isOver ? "bg-slate-200" : ""}`}>
       <Header text={text} bg={bg} count={tasksToMap.length} />
       {
         tasksToMap.length > 0 &&
         tasksToMap.map((task)=>(
-            <Task key={task.id} task={task} tasks={tasks} setTasks={setTasks}/>
+            <Task  key={task.id} task={task} tasks={tasks} setTasks={setTasks}/>
         ))
       }
     </div>
@@ -104,6 +106,9 @@ const Header = ({ text, bg, count }) => {
 };
 
 const Task = ({ task, tasks, setTasks }) => {
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
     const handleRemove = (id)=>{
         const fTasks = tasks.filter((t)=>t.id !== id)
         localStorage.setItem("tasks",JSON.stringify(fTasks));
@@ -117,8 +122,17 @@ const Task = ({ task, tasks, setTasks }) => {
           isDragging: !!monitor.isDragging()
         })
       }))
+
+      const openModal = () => {
+        setIsModalOpen(true);
+      };
+    
+      const closeModal = () => {
+        setIsModalOpen(false);
+        location.reload()
+      };
   return (
-    <div ref={drag} className="relative p-4 mt-8 shadow-md rounded-md cursor-grab">
+    <div  onClick={openModal} ref={drag} className="relative p-4 mt-8 shadow-md rounded-md cursor-grab">
       <p>{task.name}</p>
       <button className="absolute bottom-1 right-1 text-slate-400"
       onClick={()=>handleRemove(task.id)}
@@ -138,6 +152,35 @@ const Task = ({ task, tasks, setTasks }) => {
           />
         </svg>
       </button>
+      <Modal isOpen={isModalOpen} closeModal={closeModal} taskName = {task.name}/>
+     
+    </div>
+   
+  );
+};
+
+const Modal = ({ isOpen, closeModal,taskName }) => {
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`fixed inset-0 ${
+        isOpen ? 'flex' : 'hidden'
+      } items-center justify-center`}
+    >
+      <div className="fixed inset-0 bg-black opacity-50"></div>
+      <div className="bg-white p-6 rounded-lg z-10">
+        <h2 className="text-xl font-semibold mb-4">Task Name</h2>
+        <p>{taskName}</p>
+        <button
+          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
+          onClick={closeModal}
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
 };
